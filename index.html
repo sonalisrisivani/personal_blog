@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body {
+    font-family: "Lucida Console", "Courier New", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 20px;
+    transition: background-color 0.3s, color 0.3s;
+  }
+
+
+
+header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding: 10px;
+  z-index: 1000; /* Ensure the header stays above everything when scrolling */
+}
+
+
+  span {
+    font-size: 30px;
+    cursor: pointer;
+  }
+
+
+ 
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 1100; /* Sidebar stays above the header */
+  top: 0;
+  left: 0;
+  background-color: #111;
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+
+  .sidenav a {
+    padding: 8px 8px 8px 32px;
+    text-decoration: none;
+    font-size: 25px;
+    color: #818181;
+    display: block;
+    transition: 0.3s;
+  }
+
+  .sidenav a:hover {
+    color: #f1f1f1;
+  }
+
+  .sidenav .closebtn {
+    position: absolute;
+    top: 0;
+    right: 25px;
+    font-size: 36px;
+    margin-left: 50px;
+  }
+
+  @media screen and (max-height: 450px) {
+    .sidenav {
+      padding-top: 15px;
+    }
+    .sidenav a {
+      font-size: 18px;
+    }
+  }
+
+  .item-list {
+    width: 100%;
+    max-width: 600px;
+    margin-top: 20px;
+  }
+
+  .item-card {
+    border-radius: 8px;
+    padding: 10px;
+    margin: 5px 0;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .item-card:hover {
+    transform: scale(1.02);
+  }
+
+  .item-card.active {
+    background: rgba(220, 220, 220, 0.8);
+  }
+
+  .item-details {
+    margin-top: 10px;
+    padding: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease, padding 0.5s ease, margin 0.5s ease;
+  }
+
+  .item-card.active .item-details {
+    padding: 10px;
+    margin: 10px 0;
+    max-height: 20000px;
+  }
+
+  .item-image {
+    width: 100%;
+    margin-top: 10px;
+    border-radius: 5px;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    display: none;
+  }
+
+  .item-card.active .item-image {
+    display: block;
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+
+<div id="mySidenav" class="sidenav">
+  <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+  <div id="sideNavItems"></div>
+</div>
+
+
+<header>
+<span onclick="openNav()">&#9776; open</span>
+<h2>Personal Blog</h2>
+</header>
+
+
+<p>Click on the element below to open the side navigation menu.</p>
+
+
+
+<br>
+<div id="itemList" class="item-list"></div>
+
+<script type="module">
+  // Import the necessary Firebase functions
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+  import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
+
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "you api key",
+    authDomain: "xxxxx",
+    projectId: "xxxxx",
+    storageBucket: "xxxxx",
+    messagingSenderId: "xxxxx",
+    appId: "xxxxx",
+    measurementId: "xxxxx"
+  };
+
+  // Initialize Firebase & Firestore
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  // Fetch items from Firestore and display them
+  async function fetchItems() {
+    const itemsCollection = collection(db, 'items');
+    const querySnapshot = await getDocs(itemsCollection);
+    const itemList = document.getElementById('itemList');
+    const sideNavItems = document.getElementById('sideNavItems');
+    
+    itemList.innerHTML = '';
+    sideNavItems.innerHTML = '';
+
+    querySnapshot.forEach((doc) => {
+      const data = doc.data();
+
+      // Create item card
+      const itemCard = document.createElement('div');
+      itemCard.className = 'item-card';
+      itemCard.dataset.id = doc.id; // Added data-id for reference
+
+      const itemName = document.createElement('div');
+      itemName.className = 'item-name';
+      itemName.textContent = data.item;
+
+      const itemDetailsDiv = document.createElement('div');
+      itemDetailsDiv.className = 'item-details';
+      itemDetailsDiv.textContent = data.details;
+
+      const img = document.createElement('img');
+      img.className = 'item-image';
+      img.src = data.image_url;
+      img.alt = "Item Image";
+
+      itemCard.appendChild(itemName);
+      itemCard.appendChild(itemDetailsDiv);
+      itemCard.appendChild(img);
+
+      itemCard.addEventListener('click', function() {
+	const itemId = doc.id; // Get the document ID //added
+        itemCard.classList.toggle('active');
+	window.history.pushState({}, '', `#item-${itemId}`); // Update URL //added
+        scrollToItem(itemId); // Scroll to the item //added
+      });
+
+      itemList.appendChild(itemCard);
+
+      // Create side navigation link
+      const sideNavLink = document.createElement('a');
+      sideNavLink.href =  `#item-${doc.id}`;
+      sideNavLink.textContent = data.item;
+      sideNavLink.addEventListener('click', function() {
+        document.querySelectorAll('.item-card').forEach(card => {
+          card.classList.remove('active');
+        });
+        itemCard.classList.add('active');
+        closeNav();
+	scrollToItem(doc.id); // Scroll to the corresponding item
+      });
+
+      sideNavItems.appendChild(sideNavLink);
+    });
+  }
+
+
+// Scroll to the specific item
+function scrollToItem(itemId) {
+    const targetElement = document.querySelector(`.item-card[data-id="${itemId}"] .item-details`);
+    if (targetElement) {
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+
+
+  // Load items on page load
+  fetchItems();
+
+
+</script>
+
+<script>
+  function openNav() {
+    document.getElementById("mySidenav").style.width = "250px";
+  }
+
+  function closeNav() {
+    document.getElementById("mySidenav").style.width = "0";
+  }
+</script>
+
+</body>
+</html>
