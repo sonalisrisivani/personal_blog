@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Item Management</title>
+    <title>Authentication</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -13,7 +13,6 @@
             align-items: center;
             height: 100vh;
             margin: 0;
-            flex-direction: column;
         }
         .container {
             background: #ffffff;
@@ -22,13 +21,12 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             text-align: center;
             width: 400px;
-            margin-bottom: 20px;
         }
-        h1, h2 {
+        h1 {
             margin-bottom: 20px;
             color: #333;
         }
-        input, textarea, button {
+        input, button {
             width: calc(100% - 20px);
             padding: 10px;
             margin-bottom: 15px;
@@ -47,102 +45,49 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Enter Item Details</h1>
-        <input type="text" id="itemInput" placeholder="Item Name">
-        <input type="text" id="imageInput" placeholder="Image URL">
-        <textarea id="detailsInput" placeholder="Details"></textarea>
-        <button id="addItem">Add Item</button>
-    </div>
 
     <div class="container">
-        <h2>Delete Existing Item</h2>
-        <form id="deleteItemForm">
-            <input type="text" id="deleteItemName" placeholder="Enter Item Name to Delete" required><br>
-            <button type="submit">Delete Item</button>
-        </form>
+        <h1>Host Sign In</h1>
+        <input type="email" id="emailInput" placeholder="Enter your email" required>
+        <input type="password" id="passwordInput" placeholder="Enter your password" required>
+        <button id="signInButton">Sign In</button>
     </div>
 
     <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
-import { getFirestore, collection,query,where, addDoc, deleteDoc, doc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-auth.js";
 
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "xxxxxx",
-    authDomain:  "xxxxxx",
-    projectId:  "xxxxxx",
-    storageBucket:  "xxxxxx",
-    messagingSenderId:  "xxxxxx",
-    appId:  "xxxxxx",
-    measurementId:  "xxxxxx"
-};
+        // Firebase configuration
+        const firebaseConfig = {
+           // persoanl 
+        };
 
-const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
 
-// Add item to Firestore
-document.getElementById('addItem').addEventListener('click', async function() {
-    const itemInput = document.getElementById('itemInput').value.trim();
-    const imageInput = document.getElementById('imageInput').value.trim();
-    const detailsInput = document.getElementById('detailsInput').value.trim();
+        // Sign In Event
+        document.getElementById('signInButton').addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            const password = document.getElementById('passwordInput').value.trim();
 
-    if (itemInput !== "" && imageInput !== "" && detailsInput !== "") {
-        try {
-            const newItemRef = await addDoc(collection(firestore, 'items'), {
-                item: itemInput,
-                image_url: imageInput,
-                details: detailsInput
-            });
-            alert('Item added successfully!');
-            document.getElementById('itemInput').value = '';
-            document.getElementById('imageInput').value = '';
-            document.getElementById('detailsInput').value = '';
-        } catch (error) {
-            alert('Error: ' + error.message);
-        }
-    } else {
-        alert('Please fill out all fields.');
-    }
-});
-
-// Delete item from Firestore
-// Delete item from Firestore
-document.getElementById('deleteItemForm').addEventListener('submit', async (event) => {
-    event.preventDefault();
-    const itemName = document.getElementById('deleteItemName').value.trim();
-
-    if (!itemName) {
-        alert('Please enter an item name.');
-        return;
-    }
-
-    try {
-        // Query the Firestore collection for the item
-        const querySnapshot = await getDocs(
-            query(collection(firestore, 'items'), where('item', '==', itemName))
-        );
-
-        if (querySnapshot.empty) {
-            alert('Item not found.');
-            return;
-        }
-
-        // Delete matching documents
-        querySnapshot.forEach(async (docSnap) => {
-            await deleteDoc(doc(firestore, 'items', docSnap.id));
+            if (email && password) {
+                try {
+                    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                    // Redirect to enter.html after successful authentication
+                    redirectToEnterPage();
+                } catch (error) {
+                    alert('Authentication failed: ' + error.message);
+                }
+            } else {
+                alert('Please fill out all fields.');
+            }
         });
 
-        alert('Item deleted successfully!');
-        event.target.reset();
-    } catch (error) {
-        alert('Error: ' + error.message);
-    }
-});
-
-
-
-
+        // Function to redirect to enter.html
+        function redirectToEnterPage() {
+            window.location.href = 'enter.html';  // Redirect to enter.html after successful login
+        }
     </script>
+
 </body>
 </html>
