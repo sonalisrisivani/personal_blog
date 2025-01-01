@@ -7,7 +7,7 @@ This document outlines the steps to set up Firebase for the `personal-blog` proj
 1. **Go to Firebase Console**: [Firebase Console](https://console.firebase.google.com/).
 2. **Create a Project**:
    - Project Name: `personal-blog`
-   - Project ID: `personal-66d1f` (default)
+   - Project ID: `xxxxxx` (default)
 3. **Add a Web App**:
    - App Name: `personal-blog`
    - Deploy: Yes
@@ -22,13 +22,13 @@ This document outlines the steps to set up Firebase for the `personal-blog` proj
      import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
 
      const firebaseConfig = {
-       apiKey: "AIzaSyBKFrJtGjx7a94jzQj6Nm3gmMSXNxhxBHU",
-       authDomain: "personal-66d1f.firebaseapp.com",
-       projectId: "personal-66d1f",
-       storageBucket: "personal-66d1f.firebasestorage.app",
-       messagingSenderId: "967583217488",
-       appId: "1:967583217488:web:d966ba8da112d7dbba5e55",
-       measurementId: "G-S89N3SWHRJ"
+    apiKey: "ItsMyApiKey",
+    authDomain: "MuAuthDomain.firebaseapp.com",
+    projectId: "MyProjectDomain",
+    storageBucket: "MyBucket.appspot.com",
+    messagingSenderId: "BlaBlaBla",
+    appId: "NoneOfYourBusciness",
+    measurementId: "UffDontLook"
      };
 
      const app = initializeApp(firebaseConfig);
